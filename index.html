@@ -30,7 +30,6 @@
                     ระบบบันทึกชีวิตประจำวัน
                 </h1>
             </div>
-            <!-- Toggle Button to switch views in the same page -->
             <button onclick="toggleView()" id="toggle-btn" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold px-4 py-2 rounded-xl text-sm transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
                 <span id="btn-icon">📚</span>
                 <span id="btn-text">ดูประวัติย้อนหลังทั้งเดือน</span>
@@ -38,15 +37,15 @@
         </div>
     </header>
 
-    <!-- Main Container (All in one page) -->
+    <!-- Main Container -->
     <main class="max-w-3xl mx-auto px-4 py-8 flex-1 w-full space-y-6">
 
-        <!-- ================= SECTION 1: TODAY TRACKER (Default View) ================= -->
+        <!-- ================= SECTION 1: TODAY TRACKER ================= -->
         <section id="section-today" class="glass p-6 rounded-2xl shadow-xl transition-all">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-bold" id="current-date-title">วันที่ -</h2>
-                    <p class="text-sm text-slate-400">ติ๊กเช็กอินภารกิจของคุณในวันนี้</p>
+                    <p class="text-sm text-slate-400">เลือกระบุสถานะภารกิจของคุณในวันนี้</p>
                 </div>
                 <!-- Add Task Form -->
                 <form onsubmit="addTask(event)" class="flex gap-2 w-full sm:w-auto">
@@ -61,7 +60,7 @@
             <!-- Progress Bar -->
             <div class="mb-6 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
                 <div class="flex justify-between text-sm mb-2">
-                    <span class="text-slate-300 font-medium">ความคืบหน้าวันนี้</span>
+                    <span class="text-slate-300 font-medium">ความคืบหน้าการทำสำเร็จวันนี้</span>
                     <span id="progress-text" class="text-emerald-400 font-bold">0%</span>
                 </div>
                 <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
@@ -75,23 +74,20 @@
             </div>
         </section>
 
-        <!-- ================= SECTION 2: MONTHLY HISTORY (Toggleable View) ================= -->
+        <!-- ================= SECTION 2: MONTHLY HISTORY ================= -->
         <section id="section-history" class="glass p-6 rounded-2xl shadow-xl hidden transition-all">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-bold">📚 ประวัติย้อนหลังทั้งเดือน</h2>
-                    <p class="text-sm text-slate-400">ตรวจสอบกิจกรรมที่คุณทำสำเร็จย้อนหลังในแต่ละวัน</p>
+                    <p class="text-sm text-slate-400">สรุปภารกิจที่ทำได้และทำไม่ได้ในแต่ละวัน</p>
                 </div>
-                <!-- Month & Year Selector -->
                 <div class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800">
-                    <select id="history-month-select" onchange="renderHistory()" class="bg-transparent text-sm font-medium text-emerald-400 focus:outline-none px-2 cursor-pointer">
-                    </select>
-                    <select id="history-year-select" onchange="renderHistory()" class="bg-transparent text-sm font-medium text-emerald-400 focus:outline-none px-2 cursor-pointer">
-                    </select>
+                    <select id="history-month-select" onchange="renderHistory()" class="bg-transparent text-sm font-medium text-emerald-400 focus:outline-none px-2 cursor-pointer"></select>
+                    <select id="history-year-select" onchange="renderHistory()" class="bg-transparent text-sm font-medium text-emerald-400 focus:outline-none px-2 cursor-pointer"></select>
                 </div>
             </div>
 
-            <!-- Calendar Grid Overview -->
+            <!-- Calendar Grid -->
             <div class="mb-8">
                 <h3 class="text-sm font-semibold text-slate-400 mb-3">ปฏิทินสถานะประจำเดือน</h3>
                 <div id="calendar-grid" class="grid grid-cols-7 gap-2 text-center text-xs">
@@ -105,26 +101,25 @@
                 </div>
             </div>
 
-            <!-- Detailed Day-by-Day History Log -->
+            <!-- Detailed Log -->
             <div>
                 <h3 class="text-sm font-semibold text-slate-400 mb-3">ไทม์ไลน์บันทึกรายวัน</h3>
-                <div id="history-log-list" class="space-y-3">
-                </div>
+                <div id="history-log-list" class="space-y-3"></div>
             </div>
         </section>
 
     </main>
 
-    <!-- Script Application Logic -->
     <script>
-        const STORAGE_TASKS = 'daily_tracker_tasks_v3';
-        const STORAGE_LOGS = 'daily_tracker_logs_v3';
+        const STORAGE_TASKS = 'daily_tracker_tasks_v4';
+        const STORAGE_LOGS = 'daily_tracker_logs_v4';
 
+        // status: 'done' (ทำแล้ว), 'failed' (ทำไม่ได้), 'pending' (ยังไม่ได้ระบุ)
         let defaultTasks = [
-            { id: 1, text: 'ทำความสะอาด', completed: false },
-            { id: 2, text: 'เวลาเรียนภาษาญี่ปุ่น', completed: false },
-            { id: 3, text: 'เวลาเรียนภาษาอังกฤษ', completed: false },
-            { id: 4, text: 'เวลาเรียนธรรมะ', completed: false }
+            { id: 1, text: 'ทำความสะอาด', status: 'pending' },
+            { id: 2, text: 'เวลาเรียนภาษาญี่ปุ่น', status: 'pending' },
+            { id: 3, text: 'เวลาเรียนภาษาอังกฤษ', status: 'pending' },
+            { id: 4, text: 'เวลาเรียนธรรมะ', status: 'pending' }
         ];
 
         function getTodayKey() {
@@ -158,7 +153,6 @@
             saveLogs(logs);
         }
 
-        // Toggle View in the Same Page
         let isHistoryView = false;
         function toggleView() {
             isHistoryView = !isHistoryView;
@@ -183,7 +177,6 @@
             }
         }
 
-        // Render Today
         function renderToday() {
             const now = new Date();
             document.getElementById('current-date-title').innerText = `วันนี้: ${now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}`;
@@ -198,28 +191,47 @@
                 return;
             }
 
-            let completedCount = 0;
+            let doneCount = 0;
             tasks.forEach(task => {
-                if (task.completed) completedCount++;
+                if (task.status === 'done') doneCount++;
+                
+                let borderBgClass = 'bg-slate-900/60 border-slate-800';
+                if (task.status === 'done') borderBgClass = 'bg-emerald-950/20 border-emerald-500/40';
+                if (task.status === 'failed') borderBgClass = 'bg-rose-950/20 border-rose-500/40';
+
                 const item = document.createElement('div');
-                item.className = `flex items-center justify-between p-4 rounded-xl border transition-all ${task.completed ? 'bg-emerald-950/20 border-emerald-500/30' : 'bg-slate-900/60 border-slate-800'}`;
+                item.className = `flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border gap-3 transition-all ${borderBgClass}`;
+                
                 item.innerHTML = `
-                    <label class="flex items-center gap-3 cursor-pointer flex-1">
-                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})" 
-                            class="w-5 h-5 accent-emerald-500 rounded cursor-pointer">
-                        <span class="${task.completed ? 'line-through text-slate-400' : 'text-slate-200'} font-medium text-sm">${task.text}</span>
-                    </label>
-                    <button onclick="deleteTask(${task.id})" class="text-slate-500 hover:text-red-400 text-xs px-2 py-1 rounded transition-all">ลบ</button>
+                    <span class="font-medium text-sm ${task.status === 'done' ? 'text-emerald-300' : task.status === 'failed' ? 'text-rose-400 line-through' : 'text-slate-200'}">${task.text}</span>
+                    <div class="flex items-center gap-2">
+                        <!-- Done Button -->
+                        <button onclick="setTaskStatus(${task.id}, 'done')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${task.status === 'done' ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20' : 'bg-slate-800 text-slate-300 hover:bg-emerald-950 hover:text-emerald-400'}">
+                            ✓ ทำแล้ว
+                        </button>
+                        <!-- Failed Button -->
+                        <button onclick="setTaskStatus(${task.id}, 'failed')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${task.status === 'failed' ? 'bg-rose-500 text-white shadow-md shadow-rose-500/20' : 'bg-slate-800 text-slate-300 hover:bg-rose-950 hover:text-rose-400'}">
+                            ✕ ทำไม่ได้
+                        </button>
+                        <!-- Delete Button -->
+                        <button onclick="deleteTask(${task.id})" class="text-slate-500 hover:text-slate-300 text-xs px-1 ml-1">ลบ</button>
+                    </div>
                 `;
                 listEl.appendChild(item);
             });
 
-            updateProgress(completedCount, tasks.length);
+            updateProgress(doneCount, tasks.length);
         }
 
-        function toggleTask(id) {
+        function setTaskStatus(id, newStatus) {
             let tasks = loadTasks();
-            tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+            tasks = tasks.map(t => {
+                if (t.id === id) {
+                    // Toggle back to pending if clicked again
+                    return { ...t, status: t.status === newStatus ? 'pending' : newStatus };
+                }
+                return t;
+            });
             saveTasks(tasks);
             renderToday();
         }
@@ -231,7 +243,7 @@
             if (!text) return;
 
             const tasks = loadTasks();
-            tasks.push({ id: Date.now(), text, completed: false });
+            tasks.push({ id: Date.now(), text, status: 'pending' });
             saveTasks(tasks);
             input.value = '';
             renderToday();
@@ -244,13 +256,12 @@
             renderToday();
         }
 
-        function updateProgress(completed, total) {
-            const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+        function updateProgress(done, total) {
+            const percent = total === 0 ? 0 : Math.round((done / total) * 100);
             document.getElementById('progress-text').innerText = `${percent}%`;
             document.getElementById('progress-bar').style.width = `${percent}%`;
         }
 
-        // Render History
         function initHistorySelectors() {
             const monthSelect = document.getElementById('history-month-select');
             const yearSelect = document.getElementById('history-year-select');
@@ -297,12 +308,14 @@
             for (let day = 1; day <= totalDays; day++) {
                 const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const dayTasks = logs[dateKey] || [];
-                const hasCompleted = dayTasks.length > 0 && dayTasks.every(t => t.completed);
-                const hasSome = dayTasks.some(t => t.completed);
+                
+                const hasDone = dayTasks.some(t => t.status === 'done');
+                const hasFailed = dayTasks.some(t => t.status === 'failed');
 
                 let bgClass = "bg-slate-900 border-slate-800 text-slate-400";
-                if (hasCompleted) bgClass = "bg-emerald-500/20 border-emerald-500/50 text-emerald-400 font-bold";
-                else if (hasSome) bgClass = "bg-amber-500/20 border-amber-500/50 text-amber-400";
+                if (hasDone && !hasFailed) bgClass = "bg-emerald-500/20 border-emerald-500/50 text-emerald-400 font-bold";
+                else if (hasDone && hasFailed) bgClass = "bg-amber-500/20 border-amber-500/50 text-amber-400";
+                else if (!hasDone && hasFailed) bgClass = "bg-rose-500/20 border-rose-500/50 text-rose-400";
 
                 const cell = document.createElement('div');
                 cell.className = `p-2 rounded-xl border flex flex-col items-center justify-center h-12 text-xs ${bgClass}`;
@@ -320,15 +333,23 @@
 
                 if (dayTasks && dayTasks.length > 0) {
                     hasRecord = true;
-                    const completed = dayTasks.filter(t => t.completed).map(t => t.text);
-                    const pending = dayTasks.filter(t => !t.completed).map(t => t.text);
+                    const doneTasks = dayTasks.filter(t => t.status === 'done').map(t => t.text);
+                    const failedTasks = dayTasks.filter(t => t.status === 'failed').map(t => t.text);
 
                     const card = document.createElement('div');
                     card.className = "bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-1.5";
                     
                     let html = `<div class="font-bold text-emerald-400 text-sm">วันที่ ${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year + 543}</div>`;
-                    if (completed.length > 0) html += `<div class="text-xs text-slate-300"><span class="text-emerald-400 font-medium">✓ ทำแล้ว:</span> ${completed.join(', ')}</div>`;
-                    if (pending.length > 0) html += `<div class="text-xs text-slate-500"><span class="text-slate-400 font-medium">⏳ ค้างทำ:</span> ${pending.join(', ')}</div>`;
+                    
+                    if (doneTasks.length > 0) {
+                        html += `<div class="text-xs text-emerald-300"><span class="font-bold">✓ ทำแล้ว:</span> ${doneTasks.join(', ')}</div>`;
+                    }
+                    if (failedTasks.length > 0) {
+                        html += `<div class="text-xs text-rose-400"><span class="font-bold">✕ ทำไม่ได้:</span> ${failedTasks.join(', ')}</div>`;
+                    }
+                    if (doneTasks.length === 0 && failedTasks.length === 0) {
+                        html += `<div class="text-xs text-slate-500">ยังไม่ได้ระบุสถานะ</div>`;
+                    }
 
                     card.innerHTML = html;
                     logListEl.appendChild(card);
